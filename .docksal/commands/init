@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+#!/usr/bin/env bash
+
+## Initial setup for Docksal development environment
+
+green='\033[0;32m'
+yellow='\033[1;33m'
+NC='\033[0m'
+
+
+#-------- Runtime ----------
+
+
+init_project ()
+{
+#    fin exec -T composer install
+}
+
+#-------------------------- Execution --------------------------------
+
+if [[ "$PROJECT_ROOT" == "" ]]; then
+	echo-red "\$PROJECT_ROOT is not set"
+	exit 1
+fi
+
+if [[ $DOCKER_RUNNING == "true" ]]; then
+	echo -e "Step 1 ${NC}${green} Recreating services...${NC}"
+	fin reset -f
+else
+	echo -e "Step 1 ${NC}${green} Creating services...${NC}"
+	fin up
+fi
+
+# Project initialization steps
+echo -e "${green} Step 2 ${NC}${green} Initializing local project...${NC}"
+init_project
+
+if is_windows; then
+	echo-green "Add ${VIRTUAL_HOST} to your hosts file (/etc/hosts), e.g.:"
+	echo-green "192.168.64.100 ${VIRTUAL_HOST}"
+fi
+
+echo -en "\n${green} DONE! ${NC}\n"
+echo -e "Open ${yellow}http://${VIRTUAL_HOST}${NC} in your browser to verify the setup."
+
