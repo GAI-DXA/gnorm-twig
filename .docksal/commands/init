@@ -12,10 +12,10 @@ NC='\033[0m'
 #-------- Runtime ----------
 
 
-init_project ()
-{
+#init_project ()
+#{
 #    fin exec -T composer install
-}
+#}
 
 #-------------------------- Execution --------------------------------
 
@@ -34,13 +34,6 @@ fi
 
 # Project initialization steps
 echo -e "${green} Step 2 ${NC}${green} Initializing local project...${NC}"
-init_project
-
-if is_windows; then
-	echo-green "Add ${VIRTUAL_HOST} to your hosts file (/etc/hosts), e.g.:"
-	echo-green "192.168.64.100 ${VIRTUAL_HOST}"
-fi
+#init_project
 
 echo -en "\n${green} DONE! ${NC}\n"
-echo -e "Open ${yellow}http://${VIRTUAL_HOST}${NC} in your browser to verify the setup."
-
