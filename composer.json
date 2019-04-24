@@ -1,0 +1,21 @@
+{
+    "name": "wearegenuine/gnorm-twig",
+    "type": "library",
+    "description": "Supplemental library for compiling Gnorm Twig files.",
+    "authors": [
+        {
+            "name": "Les Peabody",
+            "email": "lpeabody@wearegenuine.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "twig/twig": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gnorm\\": "/src"
+        }
+    },
+    "bin": ["bin/compile"]
+}
