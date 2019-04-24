@@ -2,6 +2,7 @@
     "name": "wearegenuine/gnorm-twig",
     "type": "library",
     "description": "Supplemental library for compiling Gnorm Twig files.",
+    "license": "MIT",
     "authors": [
         {
             "name": "Les Peabody",
