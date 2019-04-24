@@ -12,10 +12,10 @@ NC='\033[0m'
 #-------- Runtime ----------
 
 
-#init_project ()
-#{
-#    fin exec -T composer install
-#}
+init_project ()
+{
+    fin exec -T composer install
+}
 
 #-------------------------- Execution --------------------------------
 
@@ -34,6 +34,6 @@ fi
 
 # Project initialization steps
 echo -e "${green} Step 2 ${NC}${green} Initializing local project...${NC}"
-#init_project
+init_project
 
 echo -en "\n${green} DONE! ${NC}\n"

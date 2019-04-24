@@ -8,9 +8,9 @@ if(!isset($autoload)) {
   exit(1);
 }
 
-execute();
+execute($repo_root);
 
-function execute() {
+function execute($repo_root) {
   try {
     // All of the following parameters are required.
     /**
@@ -27,11 +27,10 @@ function execute() {
 
     // Set targets based on passed configuration.
     // The location of the theme directory.
-    $baseDir = __DIR__ . '/../..';
+    $baseDir = $repo_root;
 
     // The location of the application directory.
     $sourceDir = $config['source'];
-    $sourcePath = $baseDir . '/' . $sourceDir;
 
     // The pattern to search for source twig files.
     $sourcePattern = $config['pattern'];
