@@ -35,7 +35,7 @@ class Drupal extends \Twig_Extension {
    * @return mixed
    *   The passed element.
    */
-  protected function passThrough($element) {
+  public function passThrough($element) {
     return $element;
   }
 }
