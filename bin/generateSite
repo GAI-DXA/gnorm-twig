@@ -76,38 +76,49 @@ function execute($repo_root) {
         $working_dir = str_replace($site_src ."/", "", $filename);
         // Get the name of the file without extension.
         $basename = basename($filename, '.twig');
-        echo "File $basename\n";
-
-        // Get any json.
-        $jsonFile = $jsonPath . "/{$basename}.json";
-        $json = getJson($jsonFile);
-        $json = array_merge($json, $globalJson);
+//        echo "File $basename\n";
 
         // Render the twig file.
         if (count($file_path = explode("/", $working_dir)) >= 2) {
-          // Subfolders.
-          $file = $site_src . "/{$file_path[0]}/{$basename}.twig";
-          $rendered = $twig->render($file, $json);
-          // Write the output file.
-          $destination = $buildPath . "/{$file_path[0]}/{$basename}.html";
+          // Get json and combine it with the global JSON.
+          $jsonFile = $site_src . "/{$file_path[0]}/{$basename}.json";
+          $json = getJson($jsonFile);
+          $json = array_merge($json, $globalJson);
 
+          // Define the twig file.
+          $file = $site_src . "/{$file_path[0]}/{$basename}.twig";
+
+          // Render twig with asscoiated JSON files.
+          $rendered = $twig->render($file, $json);
+
+          // Create directories as needed.
           if (!file_exists($buildPath . "/{$file_path[0]}")) {
             mkdir($buildPath . "/{$file_path[0]}", 0777, true);
           }
 
+          // Write the output file.
+          $destination = $buildPath . "/{$file_path[0]}/{$basename}.html";
           file_put_contents($destination, $rendered);
         }
         else {
-          $file = $site_src . "/{$basename}.twig";
-          echo $file;
-          $rendered = $twig->render($file, $json);
-          // Write the output file.
-          $destination = $buildPath . "/{$basename}.html";
+          // Get json and combine it with the global JSON.
+          $jsonFile = $site_src . "/{$basename}.json";
+          $json = getJson($jsonFile);
+          $json = array_merge($json, $globalJson);
 
+          // Define the twig file.
+          $file = $site_src . "/{$basename}.twig";
+
+          // Render twig with asscoiated JSON files.
+          $rendered = $twig->render($file, $json);
+
+          // Create directories as needed.
           if (!file_exists($buildPath)) {
             mkdir($buildPath, 0777, true);
           }
 
+          // Write the output file.
+          $destination = $buildPath . "/{$basename}.html";
           file_put_contents($destination, $rendered);
         }
       }
