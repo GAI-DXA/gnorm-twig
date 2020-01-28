@@ -18,5 +18,5 @@
             "Gnorm\\": "/src"
         }
     },
-    "bin": ["bin/compile","bin/generate_site"]
+    "bin": ["bin/compile","bin/generateSite"]
 }
