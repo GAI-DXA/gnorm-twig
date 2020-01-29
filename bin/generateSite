@@ -53,6 +53,10 @@ function execute($repo_root) {
     $globalJsonFile = $config['global'];
     $globalJson = getJson($globalJsonFile);
 
+    // If this is a build or not.
+    $isBuild = 'TRUE' == $options['b'] ? TRUE : FALSE;
+    $globalJson['isBuild'] = $isBuild;
+
     // Load twig.
     $loader = new \Twig_Loader_Filesystem($baseDir);
 
