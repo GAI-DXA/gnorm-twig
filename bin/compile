@@ -53,6 +53,9 @@ function execute($repo_root) {
 
     // Load the global json and set the build flag.
     $globalJson = getJson($globalJsonFile);
+    if (!empty($config['dynamicGlobal'])) {
+      $globalJson = array_merge($globalJson, $config['dynamicGlobal']);
+    }
     $globalJson['isBuild'] = $isBuild;
 
     // Load twig.
