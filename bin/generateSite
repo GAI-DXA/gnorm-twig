@@ -52,6 +52,9 @@ function execute($repo_root) {
     // The location of the global json file.
     $globalJsonFile = $config['global'];
     $globalJson = getJson($globalJsonFile);
+    if (!empty($config['dynamicGlobal'])) {
+      $globalJson = array_merge($globalJson, $config['dynamicGlobal']);
+    }
 
     // If this is a build or not.
     $isBuild = 'TRUE' == $options['b'] ? TRUE : FALSE;
