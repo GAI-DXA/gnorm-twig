@@ -31,9 +31,6 @@ function execute($repo_root) {
     // The location of the theme directory.
     $baseDir = $repo_root;
 
-    // The location of the application directory.
-    // $sourceDir = $config['source'];
-
     // The location of the json data files.
     $jsonPath = $config['data'];
 
@@ -83,7 +80,6 @@ function execute($repo_root) {
         $working_dir = str_replace($site_src ."/", "", $filename);
         // Get the name of the file without extension.
         $basename = basename($filename, '.twig');
-//        echo "File $basename\n";
 
         // Render the twig file.
         if (count($file_path = explode("/", $working_dir)) >= 2) {
