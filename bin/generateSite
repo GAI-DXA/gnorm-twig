@@ -32,7 +32,7 @@ function execute($repo_root) {
     $baseDir = $repo_root;
 
     // The location of the application directory.
-//    $sourceDir = $config['source'];
+    // $sourceDir = $config['source'];
 
     // The location of the json data files.
     $jsonPath = $config['data'];
@@ -90,7 +90,7 @@ function execute($repo_root) {
           // Get json and combine it with the global JSON.
           $jsonFile = $site_src . "/{$file_path[0]}/{$basename}.json";
           $json = getJson($jsonFile);
-          $json = array_merge($json, $globalJson);
+          $json = array_merge($globalJson, $json);
 
           // Define the twig file.
           $file = $site_src . "/{$file_path[0]}/{$basename}.twig";
