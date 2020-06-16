@@ -31,9 +31,6 @@ function execute($repo_root) {
     // The location of the theme directory.
     $baseDir = $repo_root;
 
-    // The location of the application directory.
-//    $sourceDir = $config['source'];
-
     // The location of the json data files.
     $jsonPath = $config['data'];
 
@@ -83,14 +80,13 @@ function execute($repo_root) {
         $working_dir = str_replace($site_src ."/", "", $filename);
         // Get the name of the file without extension.
         $basename = basename($filename, '.twig');
-//        echo "File $basename\n";
 
         // Render the twig file.
         if (count($file_path = explode("/", $working_dir)) >= 2) {
           // Get json and combine it with the global JSON.
           $jsonFile = $site_src . "/{$file_path[0]}/{$basename}.json";
           $json = getJson($jsonFile);
-          $json = array_merge($json, $globalJson);
+          $json = array_merge($globalJson, $json);
 
           // Define the twig file.
           $file = $site_src . "/{$file_path[0]}/{$basename}.twig";
