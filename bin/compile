@@ -86,7 +86,7 @@ function execute($repo_root) {
         // Get any json.
         $jsonFile = $jsonPath . "/{$basename}.json";
         $json = getJson($jsonFile);
-        $json = array_merge($json, $globalJson);
+        $json = array_merge($globalJson, $json);
 
         // Render the twig file.
         $file = $sourceDir . "/{$basename}.twig";
