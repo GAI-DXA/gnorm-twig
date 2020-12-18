@@ -73,6 +73,11 @@ function execute($repo_root) {
       'autoescape' => FALSE,
     ));
     $twig->addExtension(new \Gnorm\Extensions\Drupal());
+    
+    // Add local project extensions if they are defined.
+    if (class_exists('\Gnorm\Fed\Extensions')) {
+      $twig->addExtension(new \GnormFed\Extensions());
+    }
 
 
     // Loop through each file that matches the source pattern.
