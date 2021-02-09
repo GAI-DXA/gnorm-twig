@@ -38,6 +38,10 @@ function execute($repo_root) {
     // The location to save built files.
     $buildDir = $config['dest'];
     $buildPath = $baseDir . '/' . $buildDir;
+    // Ensure build directory exists.
+    mkdir($buildPath, 0777, TRUE);
+    // Make buildPath absolute.
+    $buildPath = realpath($buildPath);
 
     // The location of the json data files.
     $jsonPath = $config['data'];
@@ -73,7 +77,7 @@ function execute($repo_root) {
       'autoescape' => FALSE,
     ));
     $twig->addExtension(new \Gnorm\Extensions\Drupal());
-    
+
     // Add local project extensions if they are defined.
     if (class_exists('\Gnorm\Fed\Extensions')) {
       $twig->addExtension(new \Gnorm\Fed\Extensions());
