@@ -1,6 +1,10 @@
 #!/usr/bin/env php
 <?php
 
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\Error\Error;
+
 $repo_root = find_repo_root();
 $autoload = require_once $repo_root . '/vendor/autoload.php';
 if(!isset($autoload)) {
@@ -56,7 +60,7 @@ function execute($repo_root) {
     $globalJson['isBuild'] = $isBuild;
 
     // Load twig.
-    $loader = new \Twig_Loader_Filesystem($baseDir);
+    $loader = new FilesystemLoader($baseDir);
 
     // Add the namespaces.
     foreach ($namespaces as $key => $location) {
@@ -64,7 +68,7 @@ function execute($repo_root) {
     }
 
     // Setup the twig environment.
-    $twig = new \Twig_Environment($loader, array(
+    $twig = new Environment($loader, array(
       'cache' => FALSE,
       'debug' => TRUE,
       'autoescape' => FALSE,
@@ -93,7 +97,7 @@ function execute($repo_root) {
         $destination = $buildPath . "/{$basename}.html";
         file_put_contents($destination, $rendered);
       }
-      catch (Twig_Error $e) {
+      catch (Error $e) {
         $context = $e->getSourceContext();
         echo $e->getRawMessage() . "\n"
           . $context->getName() . " line: " . $e->getLine()
