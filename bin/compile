@@ -1,6 +1,11 @@
 #!/usr/bin/env php
 <?php
 
+use Gnorm\Extensions\Drupal;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\Error\Error;
+
 $repo_root = find_repo_root();
 $autoload = require_once $repo_root . '/vendor/autoload.php';
 if(!isset($autoload)) {
@@ -53,7 +58,7 @@ function execute($repo_root) {
     $globalJsonFile = $config['global'];
 
     // If this is a build or not.
-    $isBuild = 'TRUE' == $options['b'] ? TRUE : FALSE;
+    $isBuild = 'TRUE' == $options['b'];
 
     // Load the global json and set the build flag.
     $globalJson = getJson($globalJsonFile);
@@ -63,7 +68,7 @@ function execute($repo_root) {
     $globalJson['isBuild'] = $isBuild;
 
     // Load twig.
-    $loader = new \Twig_Loader_Filesystem($baseDir);
+    $loader = new FilesystemLoader($baseDir);
 
     // Add the namespaces.
     foreach ($namespaces as $key => $location) {
@@ -71,12 +76,12 @@ function execute($repo_root) {
     }
 
     // Setup the twig environment.
-    $twig = new \Twig_Environment($loader, array(
+    $twig = new Environment($loader, array(
       'cache' => FALSE,
       'debug' => TRUE,
       'autoescape' => FALSE,
     ));
-    $twig->addExtension(new \Gnorm\Extensions\Drupal());
+    $twig->addExtension(new Drupal());
 
     // Add local project extensions if they are defined.
     if (class_exists('\Gnorm\Fed\Extensions')) {
@@ -105,7 +110,7 @@ function execute($repo_root) {
         $destination = $buildPath . "/{$basename}.html";
         file_put_contents($destination, $rendered);
       }
-      catch (Twig_Error $e) {
+      catch (Error $e) {
         $context = $e->getSourceContext();
         echo $e->getRawMessage() . "\n"
           . $context->getName() . " line: " . $e->getLine()
@@ -142,6 +147,7 @@ function find_repo_root() {
       return $repo_root;
     }
   }
+  return FALSE;
 }
 
 /**
@@ -158,7 +164,7 @@ function find_repo_root() {
  *   FALSE if file was not found. Otherwise, the directory path containing the
  *   file.
  */
-function find_directory_containing_files($working_directory, $files, $max_height = 10) {
+function find_directory_containing_files(string $working_directory, array $files, $max_height = 10) {
   // Find the root directory of the git repository containing BLT.
   // We traverse the file tree upwards $max_height times until we find
   // vendor/bin/blt.
@@ -183,7 +189,7 @@ function find_directory_containing_files($working_directory, $files, $max_height
  *
  * @return bool
  */
-function files_exist($dir, $files) {
+function files_exist(string $dir, array $files) : bool {
   foreach ($files as $file) {
     if (!file_exists($dir . '/' . $file)) {
       return FALSE;
@@ -195,10 +201,11 @@ function files_exist($dir, $files) {
 /**
  * Get Json file and ensure output is an array.
  *
- * @param $file_path
+ * @param string $file_path
+ *
  * @return array
  */
-function getJson($file_path) {
+function getJson(string $file_path): array {
   if (file_exists($file_path)) {
     $json_string = file_get_contents($file_path);
     if ($json = json_decode($json_string, true)) {

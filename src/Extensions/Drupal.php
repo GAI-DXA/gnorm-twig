@@ -2,27 +2,30 @@
 
 namespace Gnorm\Extensions;
 
+use Twig\TwigFilter;
+use Twig\Extension\AbstractExtension;
+
 /**
  * Class Drupal
  *
  * @package Gnorm\Extensions
  */
-class Drupal extends \Twig_Extension {
+class Drupal extends AbstractExtension {
 
   /**
    * {@inheritdoc}
    */
   public function getFilters() {
     return [
-      new \Twig_SimpleFilter('clean_class', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('clean_id', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('format_date', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('placeholder', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('raw', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('render', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('t', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('safe_join', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('without', [$this, 'passThrough']),
+      new TwigFilter('clean_class', [$this, 'passThrough']),
+      new TwigFilter('clean_id', [$this, 'passThrough']),
+      new TwigFilter('format_date', [$this, 'passThrough']),
+      new TwigFilter('placeholder', [$this, 'passThrough']),
+      new TwigFilter('raw', [$this, 'passThrough']),
+      new TwigFilter('render', [$this, 'passThrough']),
+      new TwigFilter('t', [$this, 'passThrough']),
+      new TwigFilter('safe_join', [$this, 'passThrough']),
+      new TwigFilter('without', [$this, 'passThrough']),
     ];
   }
 
