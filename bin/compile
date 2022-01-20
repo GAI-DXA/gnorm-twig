@@ -38,8 +38,12 @@ function execute($repo_root) {
     // The location to save built files.
     $buildDir = $config['dest'];
     $buildPath = $baseDir . '/' . $buildDir;
+
     // Ensure build directory exists.
-    mkdir($buildPath, 0777, TRUE);
+    if (!file_exists($buildPath)) {
+      mkdir($buildPath, 0777, TRUE);
+    }
+
     // Make buildPath absolute.
     $buildPath = realpath($buildPath);
 
