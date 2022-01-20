@@ -43,6 +43,11 @@ function execute($repo_root) {
     $buildDir = $config['dest'];
     $buildPath = $baseDir . '/' . $buildDir;
 
+    // Ensure build directory exists.
+    if (!file_exists($buildPath)) {
+      mkdir($buildPath, 0777, TRUE);
+    }
+
     // The namespaces and their locations.
     $namespaces = $config['namespaces'];
 
