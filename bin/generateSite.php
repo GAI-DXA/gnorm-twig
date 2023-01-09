@@ -1,247 +1,32 @@
 #!/usr/bin/env php
 <?php
 
-$repo_root = find_repo_root();
+$file_system_traversal = new \Gnorm\FileSystemTraversal();
+$repo_root = $file_system_traversal->findRepoRoot();
 $autoload = require_once $repo_root . '/vendor/autoload.php';
+
 if (!isset($autoload)) {
     print "Unable to find autoloader for Gnorm.\n";
     exit(1);
 }
 
-execute($repo_root);
-
-function execute($repo_root)
-{
-
-    try {
-      // All of the following parameters are required.
-      /**
-       * Options:
-       * c = The json encoded config.
-       * s = Boolean telling if this is a static build.
-       */
-        $options = getopt('c:b:');
-
-        $config = json_decode($options['c'], true);
-
-        if (!$config) {
-            throw new Exception('Twig config missing.');
-        }
-
-      // Set targets based on passed configuration.
-      // The location of the theme directory.
-        $baseDir = $repo_root;
-
-      // The location of the json data files.
-        $jsonPath = $config['data'];
-
-        $site_src = $config['site'];
-
-      // The pattern to search for source twig files.
-        $pattern = $config['pattern'];
-
-      // The location to save built files.
-        $buildDir = $config['dest'];
-        $buildPath = $baseDir . '/' . $buildDir;
-
-      // Ensure build directory exists.
-        if (!file_exists($buildPath)) {
-            mkdir($buildPath, 0777, true);
-        }
-
-      // The namespaces and their locations.
-        $namespaces = $config['namespaces'];
-
-      // The location of the global json file.
-        $globalJsonFile = $config['global'];
-        $globalJson = getJson($globalJsonFile);
-        if (!empty($config['dynamicGlobal'])) {
-            $globalJson = array_merge($globalJson, $config['dynamicGlobal']);
-        }
-
-      // If this is a build or not.
-        $isBuild = 'TRUE' == $options['b'] ? true : false;
-        $globalJson['isBuild'] = $isBuild;
-
-      // Load twig.
-        $loader = new \Twig_Loader_Filesystem($baseDir);
-
-      // Add the namespaces.
-        foreach ($namespaces as $key => $location) {
-            $loader->addPath($location, $key);
-        }
-
-      // Setup the twig environment.
-        $twig = new \Twig_Environment($loader, array(
-        'cache' => false,
-        'debug' => true,
-        'autoescape' => false,
-        ));
-        $twig->addExtension(new \Gnorm\Extensions\Drupal());
-
-      // Loop through each file that matches the source pattern.
-        foreach (rglob($pattern) as $filename) {
-            try {
-              // Get the current working directory tree by removing site source.
-                $working_dir = str_replace($site_src . "/", "", $filename);
-              // Get the name of the file without extension.
-                $basename = basename($filename, '.twig');
-
-              // Render the twig file.
-                if (count($file_path = explode("/", $working_dir)) >= 2) {
-                    // Get json and combine it with the global JSON.
-                    $jsonFile = $site_src . "/{$file_path[0]}/{$basename}.json";
-                    $json = getJson($jsonFile);
-                    $json = array_merge($globalJson, $json);
-
-                    // Define the twig file.
-                    $file = $site_src . "/{$file_path[0]}/{$basename}.twig";
-
-                    // Render twig with asscoiated JSON files.
-                    $rendered = $twig->render($file, $json);
-
-                    // Create directories as needed.
-                    if (!file_exists($buildPath . "/{$file_path[0]}")) {
-                        mkdir($buildPath . "/{$file_path[0]}", 0777, true);
-                    }
-
-                    // Write the output file.
-                    $destination = $buildPath . "/{$file_path[0]}/{$basename}.html";
-                    file_put_contents($destination, $rendered);
-                } else {
-                // Get json and combine it with the global JSON.
-                    $jsonFile = $site_src . "/{$basename}.json";
-                    $json = getJson($jsonFile);
-                    $json = array_merge($json, $globalJson);
-
-                // Define the twig file.
-                    $file = $site_src . "/{$basename}.twig";
-
-                // Render twig with asscoiated JSON files.
-                    $rendered = $twig->render($file, $json);
-
-                // Create directories as needed.
-                    if (!file_exists($buildPath)) {
-                          mkdir($buildPath, 0777, true);
-                    }
-
-                // Write the output file.
-                    $destination = $buildPath . "/{$basename}.html";
-                    file_put_contents($destination, $rendered);
-                }
-            } catch (Twig_Error $e) {
-                $context = $e->getSourceContext();
-                echo $e->getRawMessage() . "\n"
-                . $context->getName() . " line: " . $e->getLine()
-                . "\n" . $context->getCode()
-                . "\n";
-            } catch (Throwable $e) {
-                echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
-            }
-        }
-    } catch (Throwable $e) {
-        echo $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
-    }
-}
-
-function rglob($pattern, $flags = 0)
-{
-    $files = glob($pattern, $flags);
-    foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $i => $dir) {
-        $files = array_merge($files, rglob($dir . '/' . basename($pattern), $flags));
-    }
-    return $files;
-}
-
 /**
- * Finds the root directory for the repository.
- *
- * @return bool|string
+ * Options:
+ * c = The json encoded config.
+ * b = Boolean telling if this is a build.
  */
-function find_repo_root()
-{
-    $possible_repo_roots = [
-    getcwd(),
-    realpath(__DIR__ . '/../'),
-    realpath(__DIR__ . '/../../../'),
-    ];
-  // Check for PWD - some local environments will not have this key.
-    if (isset($_SERVER['PWD'])) {
-        array_unshift($possible_repo_roots, $_SERVER['PWD']);
+$options = getopt('c:b::');
+
+try {
+    if (!$options['c']) {
+        throw new Exception('Twig config missing.');
     }
-    foreach ($possible_repo_roots as $possible_repo_root) {
-        if ($repo_root = find_directory_containing_files($possible_repo_root, ['vendor/autoload.php'])) {
-            return $repo_root;
-        }
-    }
+
+    $config = \Gnorm\GnormTwigConfiguration::decode($options['c']);
+
+    $compiler = new \Gnorm\GnormSiteGenertor($repo_root, $config, $options['b']);
+    $compiler->execute();
 }
-
-/**
- * Traverses file system upwards in search of a given file.
- *
- * Begins searching for $file in $working_directory and climbs up directories
- * $max_height times, repeating search.
- *
- * @param string $working_directory
- * @param array $files
- * @param int $max_height
- *
- * @return bool|string
- *   FALSE if file was not found. Otherwise, the directory path containing the
- *   file.
- */
-function find_directory_containing_files($working_directory, $files, $max_height = 10)
-{
-  // Find the root directory of the git repository containing BLT.
-  // We traverse the file tree upwards $max_height times until we find
-  // vendor/bin/blt.
-    $file_path = $working_directory;
-    for ($i = 0; $i <= $max_height; $i++) {
-        if (files_exist($file_path, $files)) {
-            return $file_path;
-        } else {
-            $file_path = realpath($file_path . '/..');
-        }
-    }
-
-    return false;
-}
-
-/**
- * Determines if an array of files exist in a particular directory.
- *
- * @param string $dir
- * @param array $files
- *
- * @return bool
- */
-function files_exist($dir, $files)
-{
-    foreach ($files as $file) {
-        if (!file_exists($dir . '/' . $file)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/**
- * Get Json file and ensure output is an array.
- *
- * @param $file_path
- * @return array
- */
-function getJson($file_path)
-{
-    if (file_exists($file_path)) {
-        $json_string = file_get_contents($file_path);
-        if ($json = json_decode($json_string, true)) {
-            return $json;
-        } else {
-            echo "Invalid JSON: $file_path\n";
-            return [];
-        }
-    } else {
-        return [];
-    }
+catch (Throwable $exception) {
+    echo $exception->getMessage() . "\n" . $exception->getTraceAsString() . "\n";
 }
