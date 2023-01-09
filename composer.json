@@ -1,34 +1,46 @@
 {
-    "name": "wearegenuine/gnorm-twig",
-    "type": "library",
-    "description": "Supplemental library for compiling Gnorm Twig files.",
-    "license": "MIT",
-    "authors": [
-      {
-        "name": "Les Peabody",
-        "email": "lpeabody@wearegenuine.com"
-      },
-      {
-          "name": "Patrick Connors",
-          "email": "pconnors@wearegenuine.com"
-      },
-      {
-          "name": "Ryan Brooks",
-          "email": "rbrooks@wearegenuine.com"
-      },
-      {
-          "name": "Chase Barrett",
-          "email": "cbarrett@wearegenuine.com"
+  "name": "wearegenuine/gnorm-twig",
+  "type": "library",
+  "description": "Supplemental library for compiling Gnorm Twig files.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Les Peabody",
+      "email": "lpeabody@wearegenuine.com"
+    },
+    {
+        "name": "Patrick Connors",
+        "email": "pconnors@wearegenuine.com"
+    },
+    {
+        "name": "Ryan Brooks",
+        "email": "rbrooks@wearegenuine.com"
+    },
+    {
+        "name": "Chase Barrett",
+        "email": "cbarrett@wearegenuine.com"
+    }
+  ],
+  "require": {
+      "php": "^7.4 || ^8.0",
+      "ext-json": "*",
+      "twig/twig": "2.15.3"
+  },
+  "autoload": {
+      "psr-4": {
+          "Gnorm\\": "/src"
       }
-    ],
-    "require": {
-        "php": "^7.4 || ^8.0",
-        "twig/twig": "2.6.*"
-    },
-    "autoload": {
-        "psr-4": {
-            "Gnorm\\": "/src"
-        }
-    },
-    "bin": ["bin/compile","bin/generateSite"]
+  },
+  "bin": [
+    "bin/compile",
+    "bin/generateSite"
+  ],
+  "config": {
+      "sort-packages": true
+  },
+  "require-dev": {
+      "phpcompatibility/php-compatibility": "*",
+      "phpstan/phpstan": "^1.9",
+      "squizlabs/php_codesniffer": "*"
+  }
 }
