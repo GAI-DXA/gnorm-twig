@@ -2,7 +2,7 @@
 
 namespace Gnorm;
 
-class GnormStaticSiteCompiler extends CompilerBase
+class GnormStaticSiteCompiler extends GnormCompiler
 {
 
 }

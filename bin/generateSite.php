@@ -24,8 +24,8 @@ try {
 
     $config = \Gnorm\GnormTwigConfiguration::decode($options['c']);
 
-    $compiler = new \Gnorm\GnormSiteGenertor($repo_root, $config, $options['b']);
-    $compiler->execute();
+    $static_site_compiler = new \Gnorm\GnormStaticSiteCompiler($repo_root, $config, $options['b']);
+    $static_site_compiler->execute();
 }
 catch (Throwable $exception) {
     echo $exception->getMessage() . "\n" . $exception->getTraceAsString() . "\n";
