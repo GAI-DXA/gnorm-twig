@@ -1,7 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+require __DIR__ . '/../src/FileSystemTraversal.php';
 $file_system_traversal = new \Gnorm\FileSystemTraversal();
+
 $repo_root = $file_system_traversal->findRepoRoot();
 $autoload = require_once $repo_root . '/vendor/autoload.php';
 
