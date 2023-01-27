@@ -20,11 +20,19 @@ class Drupal extends \Twig_Extension {
       new \Twig_SimpleFilter('placeholder', [$this, 'passThrough']),
       new \Twig_SimpleFilter('raw', [$this, 'passThrough']),
       new \Twig_SimpleFilter('render', [$this, 'passThrough']),
-      new \Twig_SimpleFilter('t', [$this, 'passThrough']),
+      new \Twig_SimpleFilter('url_decode', [$this, 'passThrough']),
       new \Twig_SimpleFilter('safe_join', [$this, 'passThrough']),
+      new \Twig_SimpleFilter('t', [$this, 'passThrough']),
       new \Twig_SimpleFilter('without', [$this, 'passThrough']),
     ];
   }
+
+  public function getFunctions() {
+    return [
+      new \Twig_SimpleFunction('file_url', [$this, 'passThrough']),
+    ];
+  }
+
 
   /**
    * Simple pass through the passed value.
