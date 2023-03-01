@@ -12,7 +12,7 @@ class FedExtensions implements ExtensionInterface
      */
     public function getTokenParsers()
     {
-        // TODO: Implement getTokenParsers() method.
+        return [];
     }
 
     /**
@@ -20,7 +20,7 @@ class FedExtensions implements ExtensionInterface
      */
     public function getNodeVisitors()
     {
-        // TODO: Implement getNodeVisitors() method.
+        return [];
     }
 
     /**
@@ -28,7 +28,7 @@ class FedExtensions implements ExtensionInterface
      */
     public function getFilters()
     {
-        // TODO: Implement getFilters() method.
+        return [];
     }
 
     /**
@@ -36,7 +36,7 @@ class FedExtensions implements ExtensionInterface
      */
     public function getTests()
     {
-        // TODO: Implement getTests() method.
+        return [];
     }
 
     /**
@@ -44,7 +44,7 @@ class FedExtensions implements ExtensionInterface
      */
     public function getFunctions()
     {
-        // TODO: Implement getFunctions() method.
+        return [];
     }
 
     /**
@@ -52,7 +52,7 @@ class FedExtensions implements ExtensionInterface
      */
     public function getOperators()
     {
-        // TODO: Implement getOperators() method.
+        return [];
     }
 
 }
