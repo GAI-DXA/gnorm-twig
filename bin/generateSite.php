@@ -15,7 +15,7 @@ if (!isset($autoload)) {
  * c = The json encoded config.
  * b = Boolean telling if this is a build.
  */
-$options = getopt('c:b::');
+$options = getopt('c:b:');
 
 try {
     if (!$options['c']) {
