@@ -26,7 +26,8 @@ try {
 
     $config = \Gnorm\GnormTwigConfiguration::decode($options['c']);
 
-    $compiler = new \Gnorm\GnormCompiler($repo_root, $config, $options['b']);
+    $isBuild = 'TRUE' == $options['b'] ? true : false;
+    $compiler = new \Gnorm\GnormCompiler($repo_root, $config, $isBuild);
     $compiler->execute();
 }
 catch (Throwable $exception) {
