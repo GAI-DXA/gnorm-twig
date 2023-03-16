@@ -4,6 +4,7 @@ namespace Gnorm\Extensions;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 /**
  * Class Drupal
@@ -28,6 +29,16 @@ class Drupal extends AbstractExtension
           new TwigFilter('safe_join', [$this, 'passThrough']),
           new TwigFilter('without', [$this, 'passThrough']),
         ];
+    }
+
+  /**
+   * {@inheritdoc}
+   */
+    public function getFunctions(): array
+    {
+      return [
+        new TwigFunction('create_attribute', [$this, 'passThrough']),
+      ];
     }
 
   /**
