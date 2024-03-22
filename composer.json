@@ -32,8 +32,7 @@
       }
   },
   "bin": [
-    "bin/compile.php",
-    "bin/generateSite.php"
+    "bin/compile.php"
   ],
   "config": {
       "sort-packages": true
