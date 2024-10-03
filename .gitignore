@@ -1,6 +1,12 @@
 /vendor
 /.idea
+/.vscode
 /composer.lock
 
 /phpcs.xml
 /phpstan.neon
+
+/node_modules
+*.log
+/build
+/dist

@@ -1,8 +1,0 @@
-version: "2.1"
-
-services:
-  # CLI
-  cli:
-    extends:
-      file: ${HOME}/.docksal/stacks/services.yml
-      service: cli

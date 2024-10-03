@@ -2,57 +2,69 @@
 
 namespace Gnorm;
 
+/**
+ * Class FileSystemTraversal
+ *
+ * Provides methods to traverse the file system to find specific directories or files.
+ */
 class FileSystemTraversal
 {
-
     /**
      * Finds the root directory for the repository.
      *
      * @return bool|string
+     *   Returns the path to the repository root if found, otherwise false.
      */
-    public function findRepoRoot()
+    public function findRepoRoot(): bool|string
     {
         $possible_repo_roots = [
-          getcwd(),
-          realpath(__DIR__ . '/../'),
-          realpath(__DIR__ . '/../../../'),
+            getcwd(),
+            realpath(__DIR__ . '/../'),
+            realpath(__DIR__ . '/../../../'),
         ];
+
         // Check for PWD - some local environments will not have this key.
         if (isset($_SERVER['PWD'])) {
             array_unshift($possible_repo_roots, $_SERVER['PWD']);
         }
+
         foreach ($possible_repo_roots as $possible_repo_root) {
             if ($repo_root = $this->findDirectoryContainingFiles($possible_repo_root, ['vendor/autoload.php'])) {
                 return $repo_root;
             }
         }
+
+        return false;
     }
 
     /**
      * Traverses file system upwards in search of a given file.
      *
-     * Begins searching for $file in $working_directory and climbs up directories
+     * Begins searching for $files in $working_directory and climbs up directories
      * $max_height times, repeating search.
      *
      * @param string $working_directory
-     * @param array $files
+     *   The directory to start searching from.
+     * @param string[] $files
+     *   An array of filenames to search for.
      * @param int $max_height
+     *   The maximum number of directory levels to traverse upwards.
      *
      * @return bool|string
-     *   FALSE if file was not found. Otherwise, the directory path containing the
-     *   file.
+     *   FALSE if none of the files were found. Otherwise, the directory path containing the files.
      */
-    public function findDirectoryContainingFiles(string $working_directory, array $files, int $max_height = 10)
+    public function findDirectoryContainingFiles(string $working_directory, array $files = [], int $max_height = 10): bool|string
     {
-        // Find the root directory of the git repository containing BLT.
-        // We traverse the file tree upwards $max_height times until we find
-        // vendor/bin/blt.
         $file_path = $working_directory;
+
         for ($i = 0; $i <= $max_height; $i++) {
             if ($this->filesExist($file_path, $files)) {
                 return $file_path;
-            } else {
-                $file_path = realpath($file_path . '/..');
+            }
+
+            $file_path = realpath($file_path . '/..');
+            if ($file_path === false) {
+                return false;
             }
         }
 
@@ -63,17 +75,21 @@ class FileSystemTraversal
      * Determines if an array of files exists in a particular directory.
      *
      * @param string $dir
-     * @param array $files
+     *   The directory to check for the files.
+     * @param string[] $files
+     *   An array of filenames to check for existence.
      *
      * @return bool
+     *   TRUE if all files exist in the directory, FALSE otherwise.
      */
-    public function filesExist($dir, $files): bool
+    public function filesExist(string $dir, array $files): bool
     {
         foreach ($files as $file) {
             if (!file_exists($dir . '/' . $file)) {
                 return false;
             }
         }
+
         return true;
     }
 }

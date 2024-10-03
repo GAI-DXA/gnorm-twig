@@ -5,10 +5,16 @@ require __DIR__ . '/../src/FileSystemTraversal.php';
 $file_system_traversal = new \Gnorm\FileSystemTraversal();
 
 $repo_root = $file_system_traversal->findRepoRoot();
+
+if ($repo_root === false) {
+    echo "Error: Unable to find the repository root.\n";
+    exit(1);
+}
+
 $autoload = require_once $repo_root . '/vendor/autoload.php';
 
 if (!isset($autoload)) {
-    print "Unable to find autoloader for Gnorm.\n";
+    echo "Error: Unable to find autoloader for Gnorm.\n";
     exit(1);
 }
 
@@ -29,7 +35,6 @@ try {
     $isBuild = 'TRUE' == $options['b'];
     $compiler = new \Gnorm\GnormCompiler($repo_root, $config, $isBuild);
     $compiler->execute();
-}
-catch (Throwable $exception) {
+} catch (Throwable $exception) {
     echo $exception->getMessage() . "\n" . $exception->getTraceAsString() . "\n";
 }
