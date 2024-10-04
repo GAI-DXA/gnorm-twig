@@ -7,99 +7,141 @@ use Gnorm\Fed\FedExtensions;
 use Twig\Environment;
 use Twig\Error\Error;
 use Twig\Loader\FilesystemLoader;
+use Twig\Source;
 
 class GnormCompiler implements CompilerInterface
 {
+    private Environment $twig;
+    private string $baseDir;
+    /** @var array<string, mixed> */
+    private array $twigConfig;
+    private bool $isBuild;
+
     /**
-     * Set targets based on passed configuration.
-     * The location of the theme directory.
+     * @param array<string, mixed> $twigConfig
      */
-    public string $baseDir;
-
-    public array $twigConfig;
-
-    public bool $isBuild;
-
-    public function __construct(string $repo_root, array $twig_config, bool $build = false)
+    public function __construct(string $baseDir, array $twigConfig, bool $isBuild, ?Environment $twig = null)
     {
-        $this->baseDir = $repo_root;
-        $this->twigConfig = $twig_config;
-        $this->isBuild = $build;
+        $this->baseDir = $baseDir;
+        $this->twigConfig = $twigConfig;
+        $this->isBuild = $isBuild;
+        $this->twig = $twig ?? $this->setupTwigEnvironment();
     }
 
-    public function execute()
+    public function execute(): void
     {
         try {
-            // The location to save built files.
-            $build_path = $this->baseDir . '/' . $this->twigConfig['dest'];
+            $build_path = $this->createBuildDirectory();
+            $global_json = $this->loadGlobalJson();
 
-            // Ensure build directory exists.
-            if (!file_exists($build_path)) {
-                mkdir($build_path, 0777, true);
+            $pattern = $this->twigConfig['pattern'] ?? '';
+            if (is_string($pattern)) {
+                $files = glob($pattern);
+                if ($files !== false) {
+                    foreach ($files as $filename) {
+                        $this->renderTwigFile($this->twig, $filename, $global_json, $build_path);
+                    }
+                } else {
+                    echo "No files matched the pattern.\n";
+                }
+            } else {
+                echo "Invalid pattern type.\n";
             }
+        } catch (\Throwable $exception) {
+            echo $exception->getMessage() . "\n" . $exception->getTraceAsString() . "\n";
+        }
+    }
 
-            // Absolute build_path.
-            $absolute_path = realpath($build_path);
+    private function createBuildDirectory(): string
+    {
+        $build_path = $this->baseDir . '/' . $this->twigConfig['dest'];
+        if (!file_exists($build_path)) {
+            mkdir($build_path, 0777, true);
+        }
+        $real_path = realpath($build_path);
+        if ($real_path === false) {
+            throw new \RuntimeException("Failed to resolve real path for build directory.");
+        }
+        return $real_path;
+    }
 
-            // Load the global json and set the build flag.
-            $global_json = $this->getJson($this->twigConfig['global']);
+    /**
+     * @return array<string, mixed>
+     */
+    private function loadGlobalJson(): array
+    {
+        $global_json = [];
+        $global_path = $this->twigConfig['global'] ?? '';
 
-            if (!empty($this->twigConfig['dynamicGlobal'])) {
-                $global_json = array_merge($global_json, $this->twigConfig['dynamicGlobal']);
-            }
+        if (is_string($global_path)) {
+            $global_json = $this->getJson($global_path);
+        } else {
+            echo "Invalid global JSON path type.\n";
+        }
 
-            $global_json['isBuild'] = $this->isBuild;
+        $dynamic_global = $this->twigConfig['dynamicGlobal'] ?? [];
+        if (is_array($dynamic_global)) {
+            $global_json = array_merge($global_json, $dynamic_global);
+        } else {
+            echo "Invalid dynamic global type.\n";
+        }
 
-            // Load twig.
-            $loader = new FilesystemLoader($this->baseDir);
+        $global_json['isBuild'] = $this->isBuild;
+        return $global_json;
+    }
 
-            // Add the namespaces.
-            foreach ($this->twigConfig['namespaces'] as $key => $location) {
+    private function setupTwigEnvironment(): Environment
+    {
+        $loader = new FilesystemLoader($this->baseDir);
+        $namespaces = $this->twigConfig['namespaces'] ?? [];
+
+        if (is_array($namespaces)) {
+            foreach ($namespaces as $key => $location) {
                 $loader->addPath($location, $key);
             }
+        } else {
+            echo "Invalid namespaces type.\n";
+        }
 
-            // Set up the twig environment.
-            $twig = new Environment($loader, array(
-              'cache' => false,
-              'debug' => true,
-              'autoescape' => false,
-            ));
-            $twig->addExtension(new Drupal());
+        $twig = new Environment($loader, [
+            'cache' => false,
+            'debug' => true,
+            'autoescape' => false,
+        ]);
+        $twig->addExtension(new Drupal());
+        if (class_exists('\Gnorm\Fed\FedExtensions')) {
+            $twig->addExtension(new FedExtensions());
+        }
+        return $twig;
+    }
 
-            // Add local project extensions if they are defined.
-            if (class_exists('\Gnorm\Fed\FedExtensions')) {
-                $twig->addExtension(new FedExtensions());
-            }
+    /**
+     * @param array<string, mixed> $global_json
+     */
+    private function renderTwigFile(Environment $twig, string $filename, array $global_json, string $build_path): void
+    {
+        try {
+            $basename = basename($filename, '.twig');
+            echo "Rendering $basename\n";
 
-            // Loop through each file that matches the source pattern.
-            foreach (glob($this->twigConfig['pattern']) as $filename) {
-                try {
-                    // Get the name of the file without extension.
-                    $basename = basename($filename, '.twig');
+            $json_file = $this->twigConfig['data'] . "/{$basename}.json";
+            $json = $this->getJson($json_file);
+            $json = array_merge($global_json, $json);
 
-                    echo "Rendering $basename\n";
+            $file = $this->twigConfig['source'] . "/{$basename}.twig";
+            $rendered = $twig->render($file, $json);
 
-                    // Get any json.
-                    $json_file = $this->twigConfig['data'] . "/{$basename}.json";
-                    $json = $this->getJson($json_file);
-                    $json = array_merge($global_json, $json);
-
-                    // Render the twig file.
-                    $file = $this->twigConfig['source'] . "/{$basename}.twig";
-                    $rendered = $twig->render($file, $json);
-
-                    // Write the output file.
-                    $destination = $absolute_path . "/{$basename}.html";
-                    file_put_contents($destination, $rendered);
-                } catch (Error $exception) {
-                    $context = $exception->getSourceContext();
-                    echo $exception->getRawMessage() . "\n"
-                      . $context->getName() . " line: " . $exception->getLine()
-                      . "\n" . $context->getCode()
-                      . "\n";
-                } catch (\Throwable $exception) {
-                    echo $exception->getMessage() . "\n" . $exception->getTraceAsString() . "\n";
-                }
+            $destination = $build_path . "/{$basename}.html";
+            file_put_contents($destination, $rendered);
+        } catch (Error $exception) {
+            $context = $exception->getSourceContext();
+            if ($context instanceof Source) {
+                echo $exception->getRawMessage() . "\n"
+                    . $context->getName() . " line: " . $exception->getLine()
+                    . "\n" . $context->getCode()
+                    . "\n";
+            } else {
+                echo $exception->getRawMessage() . "\n";
             }
         } catch (\Throwable $exception) {
             echo $exception->getMessage() . "\n" . $exception->getTraceAsString() . "\n";
@@ -109,21 +151,33 @@ class GnormCompiler implements CompilerInterface
     /**
      * Get Json file and ensure output is an array.
      *
-     * @param $file_path
-     * @return array
+     * @param string $file_path
+     * @return array<string, mixed>
      */
-    public function getJson($file_path): array
+    public function getJson(string $file_path): array
     {
         if (file_exists($file_path)) {
             $json_string = file_get_contents($file_path);
-            if ($json = json_decode($json_string, true)) {
-                return $json;
+            if ($json_string !== false) {
+                $json = json_decode($json_string, true);
+                if (is_array($json)) {
+                    return $json;
+                } else {
+                    echo "Invalid JSON: $file_path\n";
+                }
             } else {
-                echo "Invalid JSON: $file_path\n";
-                return [];
+                echo "Failed to read file: $file_path\n";
             }
-        } else {
-            return [];
         }
+        return [];
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getFilesToCompile(): array
+    {
+        // Implement the logic to retrieve files
+        return [];
     }
 }

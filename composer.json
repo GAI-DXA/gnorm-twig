@@ -28,7 +28,8 @@
   },
   "autoload": {
       "psr-4": {
-          "Gnorm\\": "/src"
+          "Gnorm\\": "src",
+          "Tests\\": "tests"
       }
   },
   "bin": [
@@ -38,8 +39,11 @@
       "sort-packages": true
   },
   "require-dev": {
-      "phpcompatibility/php-compatibility": "*",
-      "phpstan/phpstan": "^1.9",
-      "squizlabs/php_codesniffer": "*"
+    "php-mock/php-mock": "^2.5",
+    "php-mock/php-mock-phpunit": "^2.10",
+    "phpcompatibility/php-compatibility": "^9.3",
+    "phpstan/phpstan": "^1.9",
+    "phpunit/phpunit": "^11.3",
+    "squizlabs/php_codesniffer": "^3.6"
   }
 }
